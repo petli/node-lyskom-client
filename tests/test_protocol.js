@@ -62,7 +62,7 @@ describe('protocol', function() {
     this.timeout(20);
 
     it('should format logout request', function() {
-        var buf = protocol.formatRequest('logout', 10, {});
+        var buf = protocol.rpc.logout.formatRequest(10, {});
         var str = buf.toString('ascii');
 
         str.should.equal('10 1\n');
@@ -70,7 +70,7 @@ describe('protocol', function() {
 
 
     it('should format login request', function() {
-        var buf = protocol.formatRequest('login', 11, {
+        var buf = protocol.rpc.login.formatRequest(11, {
             person: 4711,
             passwd: 'hämligt',  // will be latin1
             invisible: true,
@@ -82,7 +82,7 @@ describe('protocol', function() {
 
 
     it('should format acceptAsync request', function() {
-        var buf = protocol.formatRequest('acceptAsync', 12, {
+        var buf = protocol.rpc.acceptAsync.formatRequest(12, {
             requestList: [12, 8, 4]
         });
         var str = buf.toString('ascii');
@@ -97,7 +97,7 @@ describe('protocol', function() {
         parseTokens(new DummyDataStream("10"), function(tokens) {
             tokens.should.have.length(1);
 
-            var parser = protocol.getResponseParser('login');
+            var parser = protocol.rpc.login.getResponseParser();
             var remaining = parser.parseTokens(tokens);
             var msg = parser.getMessage();
 
@@ -115,7 +115,7 @@ describe('protocol', function() {
         parseTokens(new DummyDataStream("4 4711"), function(tokens) {
             tokens.should.have.length(2);
 
-            var parser = protocol.getErrorParser();
+            var parser = protocol.rpc.login.getErrorParser();
             var remaining = parser.parseTokens(tokens);
             var msg = parser.getMessage();
 
@@ -134,7 +134,7 @@ describe('protocol', function() {
         parseTokens(new DummyDataStream("4 4711"), function(tokens) {
             tokens.should.have.length(2);
 
-            var parser = protocol.getErrorParser();
+            var parser = protocol.rpc.login.getErrorParser();
             var remaining1 = parser.parseTokens([tokens[0]]);
             var msg1 = parser.getMessage();
 
@@ -158,7 +158,7 @@ describe('protocol', function() {
         parseTokens(new DummyDataStream("4711 1234 6Hfoobar"), function(tokens) {
             tokens.should.have.length(3);
 
-            var parser = protocol.getAsyncParser(protocol.async.sendMessage);
+            var parser = protocol.async[12].getMessageParser();
             var remaining = parser.parseTokens(tokens);
             var msg = parser.getMessage();
 
