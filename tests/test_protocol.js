@@ -1,4 +1,4 @@
-/* LysKOM protocol A token stream unit tests
+/* LysKOM protocol A protocol unit tests
  *
  * Copyright 2014 Peter Liljenberg <peter.liljenberg@gmail.com>
  *

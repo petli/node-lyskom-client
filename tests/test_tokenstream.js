@@ -119,6 +119,33 @@ describe('TokenStream', function() {
     });
 
 
+    it('should handle trailing whitespace', function(done) {
+        var ds = new DummyDataStream(
+            '123   '
+        );
+
+        var ts = new TokenStream(ds, false);
+        var tokens = [];
+
+        ts.on('tokens', function(t) {
+            tokens = tokens.concat(t);
+        });
+
+        ts.on('end', function() {
+            tokens.should.have.length(1);
+
+            tokens[0].type.should.equal('int');
+            tokens[0].raw.toString().should.equal('123');
+            tokens[0].value.should.equal(123);
+
+            done();
+        });
+
+        ds.run();
+    });
+
+
+
     it('should parse float', function(done) {
         var ds = new DummyDataStream(
             ' \n 12.3456'
@@ -142,6 +169,32 @@ describe('TokenStream', function() {
 
         ds.run();
     });
+
+
+    it('should parse partial float', function(done) {
+        var ds = new DummyDataStream(
+            '12.3', '456'
+        );
+
+        var ts = new TokenStream(ds, false);
+        var tokens = [];
+
+        ts.on('tokens', function(t) {
+            tokens = tokens.concat(t);
+        });
+
+        ts.on('end', function() {
+            tokens.should.have.length(1);
+
+            tokens[0].type.should.equal('float');
+            tokens[0].value.should.be.approximately(12.3456, 0.0001);
+
+            done();
+        });
+
+        ds.run();
+    });
+
 
 
     it('should parse strings', function(done) {
