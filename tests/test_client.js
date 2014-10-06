@@ -256,7 +256,28 @@ describe('Client', function() {
         var c = new Client(new ExpectSocket(
             { expect: 'A11Htest%foobar\n',
               send: ['LysKOM\n',
-                     ':', '3 ', '12 4711 1234 6Hfoobar'] }
+                     ':', '3 ', '12 4711 1234 6Hfoobar\n'] }
+        ));
+
+        c.on('connect', function() {
+            c.close();
+        });
+
+        c.on('send-message', function(msg) {
+            msg.recipient.should.equal(4711);
+            msg.sender.should.equal(1234);
+            msg.message.toString().should.equal('foobar');
+            done();
+        });
+    });
+
+    it('should parse unknown async message', function(done) {
+        var c = new Client(new ExpectSocket(
+            { expect: 'A11Htest%foobar\n',
+              send: ['LysKOM\n',
+                     ':4 9999 4711 ', '1234 6Hfoobar 1\n',
+                     // Include parsable message to detect OK parsing
+                     ':3 12 4711 1234 6Hfoobar\n'] }
         ));
 
         c.on('connect', function() {
