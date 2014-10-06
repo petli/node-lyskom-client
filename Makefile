@@ -1,7 +1,7 @@
 
 JSHINT = ./node_modules/.bin/jshint
 
-node-js = *.js lib/*.js tests/*.js
+node-js = *.js lib/*.js tests/*.js examples/*.js
 
 test = tests/*.js
 

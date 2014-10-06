@@ -22,6 +22,7 @@
   "devDependencies": {
       "jshint": "2.x",
       "mocha": "1.x",
-      "should": "4.x"
+      "should": "4.x",
+      "yargs": "^1.3.1"
   }
 }
