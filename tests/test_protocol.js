@@ -91,6 +91,25 @@ describe('protocol', function() {
     });
 
 
+    it('should format createPerson request', function() {
+        // Exercises bitstrings and arrays of structs
+
+        var buf = protocol.rpc.createPerson.formatRequest(13, {
+            name: 'foo',
+            passwd: 'bar',
+            flags: { unreadIsSecret: true },
+            auxItems: [
+                { tag: 17, flags: { inherit: true, dontGarb: true }, inheritLimit: 0, data: 'gazonk' },
+                { tag: 18, flags: {}, inheritLimit: 10, data: '' }]
+        });
+        var str = buf.toString('ascii');
+
+        str.should.equal('13 89 3Hfoo 3Hbar 10000000 2 { ' +
+                         '17 01001000 0 6Hgazonk ' +
+                         '18 00000000 10 0H }\n');
+    });
+
+
     it('should parse login response', function(done) {
         // The =refNo has already been handled by the Client object
 

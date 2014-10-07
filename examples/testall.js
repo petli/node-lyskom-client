@@ -19,11 +19,19 @@ var lyskom = require('../index.js');
 
 var getAsyncHandler = function(name) {
     return function(msg) {
-        console.log('%s: %j', name, msg);
+        console.log('<= %s: %j', name, msg);
     };
 };
 
 var client;
+
+var timestamp = Date.now();
+var persons = [
+    { name: 'test ' + timestamp + ' a', },
+    { name: 'test ' + timestamp + ' b', },
+];
+var passwd = 'test';
+
 
 console.log('Connecting to 127.0.0.1');
 lyskom.connectAndWait({host: '127.0.0.1'})
@@ -66,16 +74,39 @@ lyskom.connectAndWait({host: '127.0.0.1'})
 
         console.log('-> getTime & getDate');
         return Promise.props({ time: client.getTime(),
-                               date: client.getDate()});
+                               date: client.getDate() });
     })
     .then(function(v) {
         console.log('<- %s DOW %s DOY %s DST: %s',
                     v.date, v.time.dayOfWeek, v.time.dayOfYear, v.time.isDST);
+
+        console.log('-> createPerson %s', persons[0].name);
+        return client.createPerson({
+            name: persons[0].name,
+            passwd: passwd,
+            flags: { unreadIsSecret: true },
+            auxItems: [
+                { tag: lyskom.aux.emailAddress, flags: {}, inheritLimit: 0, data: 'foo@example.org' },
+            ]});
+    })
+    .then(function(num) {
+        console.log('<- %d', num);
+        persons[0].number = num;
+
+        console.log('-> login');
+        return client.login({ person: persons[0].number, passwd: passwd, invisible: false});
+    })
+    .then(function() {
+        console.log('-> logout');
+        return client.logout();
+    })
+    .catch(function(err) {
+        console.log('<- Request error: %j', err);
     })
     .then(function() {
         console.log('Closing connection');
         client.close();
     })
     .catch(function(err) {
-        console.log('<- Request error: %j', err);
+        console.log('Client error: %j', err);
     });

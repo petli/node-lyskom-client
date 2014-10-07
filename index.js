@@ -85,3 +85,6 @@ for (var num in protocol.async) {
         exports.async[a.name] = exports.async[camelCaseName(a.name)] = parseInt(num, 10);
     }
 }
+
+// Expose aux item tags as is
+exports.aux = protocol.aux;
