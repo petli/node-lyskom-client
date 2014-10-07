@@ -74,7 +74,7 @@ describe('TokenStream', function() {
             tokens.should.have.length(1);
 
             tokens[0].type.should.equal('int');
-            tokens[0].raw.toString().should.equal('123456');
+            tokens[0].string.should.equal('123456');
             tokens[0].value.should.equal(123456);
 
             done();
@@ -100,16 +100,16 @@ describe('TokenStream', function() {
             tokens.should.have.length(3);
 
             tokens[0].type.should.equal('int');
-            tokens[0].raw.toString().should.equal('0');
+            tokens[0].string.should.equal('0');
             tokens[0].value.should.equal(0);
 
             // This could be either an int or a bitstring (probably the latter)
             tokens[1].type.should.equal('int');
-            tokens[1].raw.toString().should.equal('010');
+            tokens[1].string.should.equal('010');
             tokens[1].value.should.equal(10);
 
             tokens[2].type.should.equal('int');
-            tokens[2].raw.toString().should.equal('4294967295');
+            tokens[2].string.should.equal('4294967295');
             tokens[2].value.should.equal(4294967295);
 
             done();
@@ -135,7 +135,7 @@ describe('TokenStream', function() {
             tokens.should.have.length(1);
 
             tokens[0].type.should.equal('int');
-            tokens[0].raw.toString().should.equal('123');
+            tokens[0].string.should.equal('123');
             tokens[0].value.should.equal(123);
 
             done();

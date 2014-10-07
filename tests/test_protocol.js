@@ -127,6 +127,35 @@ describe('protocol', function() {
         });
     });
 
+    it('should parse getUconfStat response', function(done) {
+        // Exercises bitstring parsing
+
+        parseTokens(new DummyDataStream("3Hfoo 01001100 12000 30"), function(tokens) {
+            tokens.should.have.length(4);
+
+            var parser = protocol.rpc.getUconfStat.getResponseParser();
+            var remaining = parser.parseTokens(tokens);
+            var msg = parser.getMessage();
+
+            remaining.should.have.length(0);
+
+            msg.name.toString().should.equal('foo');
+
+            msg.type.should.be.Object;
+            msg.type.rdProt.should.be.false;
+            msg.type.original.should.be.true;
+            msg.type.secret.should.be.false;
+            msg.type.letterbox.should.be.false;
+            msg.type.allowAnonymous.should.be.true;
+            msg.type.forbidSecret.should.be.true;
+
+            msg.highestLocalNo.should.equal(12000);
+            msg.nice.should.equal(30);
+
+            done();
+        });
+    });
+
 
     it('should parse request error', function(done) {
         // The %refNo has already been handled by the Client object

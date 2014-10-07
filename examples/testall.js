@@ -93,10 +93,17 @@ lyskom.connectAndWait({host: '127.0.0.1'})
         console.log('<- %d', num);
         persons[0].number = num;
 
-        console.log('-> login');
+        console.log('-> login %s', persons[0].number);
         return client.login({ person: persons[0].number, passwd: passwd, invisible: false});
     })
     .then(function() {
+        console.log('-> getUconfStat %s', persons[0].number);
+        return client.getUconfStat({ conference: persons[0].number });
+    })
+    .then(function(uconf) {
+        console.log('<- %s: %j highest local %s nice %s',
+                    uconf.name, uconf.type, uconf.highestLocalNo, uconf.nice);
+
         console.log('-> logout');
         return client.logout();
     })
