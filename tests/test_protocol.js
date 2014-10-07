@@ -9,6 +9,10 @@
 
 // silence errors about "foo.should.be.empty;"
 /* jshint -W030 */
+
+// silence errors about wrapping functions in parens
+/* jshint -W068 */
+
 /* global describe, it */
 
 var util = require('util');
@@ -16,6 +20,7 @@ var events = require('events');
 var should = require('should'); // jshint ignore:line
 var iconv = require('iconv-lite');
 
+var errors = require('../lib/errors');
 var protocol = require('../lib/protocol');
 var TokenStream = require('../lib/tokenstream');
 
@@ -151,6 +156,90 @@ describe('protocol', function() {
 
             msg.highestLocalNo.should.equal(12000);
             msg.nice.should.equal(30);
+
+            done();
+        });
+    });
+
+    it('should parse lookupZName response', function(done) {
+        // Exercises array parsing
+
+        parseTokens(new DummyDataStream('2 { 3Hfoo 1001 4711 3Hfie 0100 4712 }\n10\n'), function(tokens) {
+            tokens.should.have.length(10);
+
+            var parser = protocol.rpc.lookupZName.getResponseParser();
+
+            // Split parsing to check that it survives that
+            var remaining = parser.parseTokens(tokens.slice(0, 1));
+            should(remaining).equal(null);
+
+            remaining = parser.parseTokens(tokens.slice(1, 3));
+            should(remaining).equal(null);
+
+            remaining = parser.parseTokens(tokens.slice(3));
+            remaining.should.have.length(1);
+
+            var msg = parser.getMessage();
+
+            msg.should.have.length(2);
+
+            msg[0].name.toString().should.equal('foo');
+            msg[0].type.rdProt.should.be.true;
+            msg[0].type.original.should.be.false;
+            msg[0].type.secret.should.be.false;
+            msg[0].type.letterbox.should.be.true;
+            msg[0].confNo.should.equal(4711);
+
+            msg[1].name.toString().should.equal('fie');
+            msg[1].type.rdProt.should.be.false;
+            msg[1].type.original.should.be.true;
+            msg[1].type.secret.should.be.false;
+            msg[1].type.letterbox.should.be.false;
+            msg[1].confNo.should.equal(4712);
+
+            done();
+        });
+    });
+
+    it('should parse empty lookupZName response', function(done) {
+        parseTokens(new DummyDataStream('0 *\n10\n'), function(tokens) {
+            tokens.should.have.length(3);
+
+            var parser = protocol.rpc.lookupZName.getResponseParser();
+            var remaining = parser.parseTokens(tokens);
+            var msg = parser.getMessage();
+
+            remaining.should.have.length(1);
+
+            msg.should.have.length(0);
+
+            done();
+        });
+    });
+
+    it('should fail on truncated array', function(done) {
+        parseTokens(new DummyDataStream("2 { 3Hfoo 1001 4711 }\n"), function(tokens) {
+            tokens.should.have.length(6);
+
+            var parser = protocol.rpc.lookupZName.getResponseParser();
+
+            (function() {
+                parser.parseTokens(tokens);
+            }).should.throw(errors.ProtocolError);
+
+            done();
+        });
+    });
+
+    it('should fail on too long array', function(done) {
+        parseTokens(new DummyDataStream("0 { 3Hfoo 1001 4711 }\n"), function(tokens) {
+            tokens.should.have.length(6);
+
+            var parser = protocol.rpc.lookupZName.getResponseParser();
+
+            (function() {
+                parser.parseTokens(tokens);
+            }).should.throw(errors.ProtocolError);
 
             done();
         });

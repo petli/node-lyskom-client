@@ -93,6 +93,14 @@ lyskom.connectAndWait({host: '127.0.0.1'})
         console.log('<- %d', num);
         persons[0].number = num;
 
+        console.log('-> createPerson %s', persons[1].name);
+        return client.createPerson({
+            name: persons[1].name, passwd: passwd, flags: {}, auxItems: []});
+    })
+    .then(function(num) {
+        console.log('<- %d', num);
+        persons[1].number = num;
+
         console.log('-> login %s', persons[0].number);
         return client.login({ person: persons[0].number, passwd: passwd, invisible: false});
     })
@@ -103,6 +111,23 @@ lyskom.connectAndWait({host: '127.0.0.1'})
     .then(function(uconf) {
         console.log('<- %s: %j highest local %s nice %s',
                     uconf.name, uconf.type, uconf.highestLocalNo, uconf.nice);
+
+        console.log('-> lookupZName');
+        return client.lookupZName({ name: 't ' + timestamp, wantPersons: true, wantConfs: true });
+
+    })
+    .then(function(names) {
+        for (var i = 0; i < names.length; i++) {
+            console.log('<- %s: %s %j', names[i].name, names[i].confNo, names[i].type);
+        }
+
+        console.log('-> reZLookup');
+        return client.reZLookup({ regexp: 't.*' + timestamp, wantPersons: true, wantConfs: true });
+    })
+    .then(function(names) {
+        for (var i = 0; i < names.length; i++) {
+            console.log('<- %s: %s %j', names[i].name, names[i].confNo, names[i].type);
+        }
 
         console.log('-> logout');
         return client.logout();
