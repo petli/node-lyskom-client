@@ -67,6 +67,15 @@ exports.ClientError = errors.ClientError;
 exports.RequestError = errors.RequestError;
 
 
+/** List all implemented requests.
+ */
+exports.rpc = {};
+for (var name in protocol.rpc) {
+    if (protocol.rpc.hasOwnProperty(name)) {
+        exports.rpc[name] = true;
+    }
+}
+
 /** Map of async message names to numbers and vice versa to support
  * usage of Client.acceptAsync/queryAsync.
  *
